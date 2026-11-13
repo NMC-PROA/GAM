@@ -1,9 +1,7 @@
 name: Daily Dependency Pinning (2-Week Buffer)
 
 on:
-  schedule:
-    # Runs every day at midnight UTC
-    - cron: '0 0 * * *'
+  # verified branch: no scheduled auto-upgrades; run manually, review the PR, re-audit
   workflow_dispatch: # Allows you to trigger it manually from the UI
 
 jobs:
@@ -23,9 +21,9 @@ jobs:
           python-version: '3.14'
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@caf0cab7a618c569241d31dcd442f54681755d39 # v3.2.4
         with:
-          version: "latest"
+          version: "0.13.5"
 
       - name: Calculate and pin two-week old stable versions
         shell: python

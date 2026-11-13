@@ -23,11 +23,11 @@ jobs:
 
       - name: Install required packages to publish
         run: |
-          python3 -m pip install --upgrade build
+          python3 -m pip install --require-hashes --no-deps -r build-requirements.lock
 
       - name: Build packages
         run: |
-          python -m build
+          python -m build --no-isolation
 
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e # v1.13.0

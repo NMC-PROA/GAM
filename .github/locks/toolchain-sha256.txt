@@ -1,0 +1,15 @@
+6578712f00ed217fb8ab3c766d786dedacfb44e0dbb0d6afc4c3687a4cd573f9  python-3.15.2-openssl-4.1.0-macos-15-ARM64.tar.xz
+f77f993b9bea35a8e2955fc223e607b552a5c65805ced1e541b08cee98a145da  python-3.15.2-openssl-4.1.0-macos-15-intel-X64.tar.xz
+f870d4f19215baf08e03d3aaa8c05d699bbad59f5028410096314f36aabda173  python-3.15.2-openssl-4.1.0-macos-26-ARM64.tar.xz
+513f7bc21497d7a2208301727ea756c2c913e6bd11ae506e50c9aab8f67f041d  python-3.15.2-openssl-4.1.0-macos-26-intel-X64.tar.xz
+748915dbe78ac98999ee26b23daa27f5fe65df5bb6a3456861b38f31ca8b9fee  python-3.15.2-openssl-4.1.0-macos-27-ARM64.tar.xz
+3878228b6f955b02818865a845bea1aa54f0f6c7267cddda9027d693521728db  python-3.15.2-openssl-4.1.0-ubuntu-22.04-arm-ARM64.tar.xz
+adff271117939ad79fb6254a92fb4f72222b90907720d34216c1794239cc08a5  python-3.15.2-openssl-4.1.0-ubuntu-22.04-X64.tar.xz
+368f27f3df1cd7562089a33a534f5f765456e9572b107f28354eb228f59b6417  python-3.15.2-openssl-4.1.0-ubuntu-24.04-arm-ARM64.tar.xz
+3568e652a3828eed72aee60f2ad4220de944885f8115fdfed9598a6d7448fc36  python-3.15.2-openssl-4.1.0-ubuntu-24.04-X64.tar.xz
+40adadca5e99ae1cb549a7a45d7899cecb968f914afaaa27b89fad55044d2143  python-3.15.2-openssl-4.1.0-ubuntu-26.04-arm-ARM64.tar.xz
+2417d3cf43eb0a787faab790d464f186fe7662dc3ed653027f3afb294202bf08  python-3.15.2-openssl-4.1.0-ubuntu-26.04-X64.tar.xz
+3bb5466aeb2fcd7cd126f1147865dc979ae7472233925ce173c45c7e0e8f1d91  python-3.15.2-openssl-4.1.0-windows-11-arm-ARM64.zip
+8217be6927f39aca73c3db78bafcfe82b6a77a4f9071eef4c93522098be11506  python-3.15.2-openssl-4.1.0-windows-2025-X64.zip
+8217be6927f39aca73c3db78bafcfe82b6a77a4f9071eef4c93522098be11506  python-3.15.2-openssl-4.1.0-windows-latest-X64.zip
+748915dbe78ac98999ee26b23daa27f5fe65df5bb6a3456861b38f31ca8b9fee  python-3.15.2-openssl-4.1.0-xcode-27-ARM64.tar.xz

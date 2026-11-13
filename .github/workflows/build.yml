@@ -136,7 +136,15 @@ jobs:
       - name: Setup Latest Python and OpenSSL
         if: matrix.goal == 'build'
         id: setup-python
-        uses: jay0lee/python-openssl-latest@v1
+        uses: jay0lee/python-openssl-latest@7008438716fd6ba2344f7796f68d52004d567a4d # v1.2026.11.08.1052
+        with:
+          version: v1.2026.11.08.1052
+
+      - name: Verify Python/OpenSSL toolchain archive against pinned SHA-256
+        if: matrix.goal == 'build'
+        run: |
+          # upstream installer does not verify digests (see VERIFIED.md); fail closed here
+          if command -v python3 >/dev/null 2>&1; then python3 "$GITHUB_WORKSPACE/.github/actions/verify_toolchain.py"; else python "$GITHUB_WORKSPACE/.github/actions/verify_toolchain.py"; fi
 
       - name: Use pre-compiled Python for testing
         if: matrix.python != ''
@@ -217,8 +225,18 @@ jobs:
         if: runner.os == 'macOS'
         run: |
           # Install latest Rust
-          curl $curl_retry -fsS -o rust.sh https://sh.rustup.rs
-          bash ./rust.sh -y
+          # Pinned rustup 1.29.3 + Rust 1.100.0, verified by sha256 (replaces curl sh.rustup.rs | bash)
+          if [[ "$RUNNER_ARCH" == "ARM64" ]]; then
+            rustup_triple=aarch64-apple-darwin
+            rustup_sha=63752a1919a3a4793173ec70f8f212621a7ce38ba6a246095984482f4de20f9f
+          else
+            rustup_triple=x86_64-apple-darwin
+            rustup_sha=bc107f1fb0228de7fa32413c89c1b305cea9cd256e94b01150cd054128145429
+          fi
+          curl $curl_retry -fsS -o rustup-init "https://static.rust-lang.org/rustup/archive/1.29.3/${rustup_triple}/rustup-init"
+          echo "${rustup_sha}  rustup-init" | shasum -a 256 -c -
+          chmod +x rustup-init
+          ./rustup-init -y --default-toolchain 1.100.0
           source $HOME/.cargo/env
           # Install needed packages
           #brew update
@@ -256,13 +274,15 @@ jobs:
       - name: Create and use Python .venv
         run: |
           cd "$GITHUB_WORKSPACE"
-          curl -o get-pip.py https://bootstrap.pypa.io/get-pip.py
-          "$PYTHON" get-pip.py
+          # get-pip.py pinned to pypa/get-pip commit 8c42746 and verified by sha256
+          curl -fsSL -o get-pip.py https://raw.githubusercontent.com/pypa/get-pip/8c427468071b5d15717839ffd76c53a96df8b703/public/get-pip.py
+          "$PYTHON" -c "import hashlib,sys; h=hashlib.sha256(open('get-pip.py','rb').read()).hexdigest(); sys.exit(0 if h=='356e0d0de21cdc348c3394084d90939b85e4246c4d14c76aee6ca4f46646ea98' else 'get-pip.py: sha256 mismatch '+h)"
+          "$PYTHON" get-pip.py "pip==26.3" --no-setuptools --no-wheel
           "$PYTHON" -m venv .venv
           if [[ "$RUNNER_OS" == "Windows" ]]; then
             # pyscard seems to build outside venv but not in it.
             # build it so it's cached.
-            "$PYTHON" -m pip install --upgrade pyscard
+            "$PYTHON" -m pip install --require-hashes --no-deps -r .github/locks/pyscard.lock
             export PYTHON="${GITHUB_WORKSPACE}/.venv/scripts/python.exe"
           else
             export PYTHON="${GITHUB_WORKSPACE}/.venv/bin/python3"
@@ -280,21 +300,27 @@ jobs:
           if ([ "$RUNNER_OS" == "Windows" ] && [ "$RUNNER_ARCH" == "ARM64" ]); then
             # custom cryptography wheel for win arm64 since the project doesn't provide one:
             # https://github.com/pyca/cryptography/issues/14293
-            gh release download --repo "jay0lee/cryptography-wheels" --pattern "*[^t]-win_arm64.whl" --clobber
-            "$PYTHON" -m pip install cryptography-*.whl
+            # pinned release + sha256 (audited 2026-11-13)
+            gh release download release-2026-11-12-43274931471 --repo "jay0lee/cryptography-wheels" --pattern "cryptography-50.0.2-cp314-abi3-win_arm64.whl" --clobber
+            "$PYTHON" -c "import hashlib,sys; h=hashlib.sha256(open('cryptography-50.0.2-cp314-abi3-win_arm64.whl','rb').read()).hexdigest(); sys.exit(0 if h=='a00bdd398350120ef82041f1d9a15f64807e7470c020f45415e6e777395742c9' else 'cryptography-50.0.2-cp314-abi3-win_arm64.whl: sha256 mismatch '+h)"
+            "$PYTHON" -m pip install --no-deps cryptography-50.0.2-cp314-abi3-win_arm64.whl
           elif [[ "$RUNNER_OS" == "macOS" && "$RUNNER_ARCH" == "x86_64" ]]; then
             # custom cryptography wheel for macos x86_64 since it's no longer standard
-            gh release download --repo "jay0lee/cryptography-wheels" --pattern "*[^t]-macosx_15_0_x86_64.whl" --clobber
-            "$PYTHON" -m pip install cryptography-*.whl
+            # pinned release + sha256 (audited 2026-11-13)
+            gh release download release-2026-11-12-43274931471 --repo "jay0lee/cryptography-wheels" --pattern "cryptography-50.0.2-cp314-abi3-macosx_15_0_x86_64.whl" --clobber
+            "$PYTHON" -c "import hashlib,sys; h=hashlib.sha256(open('cryptography-50.0.2-cp314-abi3-macosx_15_0_x86_64.whl','rb').read()).hexdigest(); sys.exit(0 if h=='cd92c278f34c3a3cfcde62d1c34a25eadfbe7d6e28070dfbe1de604d77b1f717' else 'cryptography-50.0.2-cp314-abi3-macosx_15_0_x86_64.whl: sha256 mismatch '+h)"
+            "$PYTHON" -m pip install --no-deps cryptography-50.0.2-cp314-abi3-macosx_15_0_x86_64.whl
           fi
-          "$PYTHON" -m pip install ..[yubikey]
+          # Everything below is hash-locked (see VERIFIED.md). Build tools first so hatchling is available without build isolation.
+          "$PYTHON" -m pip install --require-hashes --no-deps -r ../build-requirements.lock
+          "$PYTHON" -m pip install --require-hashes --no-deps -r ../requirements.lock
+          "$PYTHON" -m pip install --no-deps --no-build-isolation ..
 
       - name: Install PyInstaller
         if: matrix.goal == 'build'
         run: |
-          # Install latest version of PyInstaller *that's 2 weeks old*
-          # Calculate the exact timestamp for 14 days ago
-          "$PYTHON" -m pip install --upgrade pyinstaller
+          # PyInstaller is pinned and hash-locked in build-requirements.lock (installed above).
+          "$PYTHON" -m PyInstaller --version
 
       - name: Build GAM with PyInstaller
         if: matrix.goal != 'test'
@@ -360,9 +386,8 @@ jobs:
           sudo apt-get -qq --yes update
           # arm64 needs to build a wheel and needs scons to build
           sudo apt-get -qq --yes install scons
-          "$PYTHON" -m pip install --upgrade patchelf-wrapper
-          "$PYTHON" -m pip install --upgrade typing_extensions
-          "$PYTHON" -m pip install --upgrade staticx
+          # staticx and typing_extensions are hash-locked (build-requirements.lock, requirements.lock).
+          "$PYTHON" -m pip install --require-hashes --no-deps -r ../.github/locks/patchelf-wrapper.lock
 
       - name: Make StaticX GAM build
         if: matrix.staticx == 'yes'
@@ -516,7 +541,7 @@ jobs:
       - name: Windows package exe with Inno Setup
         if: runner.os == 'Windows' && matrix.goal != 'test'
         run: |
-          choco install innosetup
+          choco install innosetup --version=6.7.1 --yes
           iscc \
             /S"gamsigntool=$CERTUM_SIGNTOOL_PATH sign /sha1 $WINDOWS_CODESIGN_CERT_HASH /tr http://time.certum.pl /td SHA256 /fd SHA256 /v \$f" \
             /O"$GITHUB_WORKSPACE" \

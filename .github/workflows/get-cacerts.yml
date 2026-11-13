@@ -1,8 +1,7 @@
 name: Check for Google Root CA Updates
 
 on:
-  schedule:
-    - cron: '23 23 * * *'
+  # verified branch: cacerts.pem is audited and pinned; no scheduled auto-commit
   workflow_dispatch:
 
 defaults:

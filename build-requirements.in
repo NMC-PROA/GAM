@@ -1,0 +1,6 @@
+pyinstaller
+staticx
+build
+hatchling<1.30.0
+pip
+wheel

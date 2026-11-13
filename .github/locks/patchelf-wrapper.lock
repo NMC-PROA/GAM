@@ -1,0 +1,4 @@
+# sdist only (no wheel exists); it compiles an embedded patchelf 0.11 tarball at install time.
+# Hash is the PyPI sdist digest for patchelf-wrapper 1.2.0, uploaded 2020-07-04.
+patchelf-wrapper==1.2.0 \
+    --hash=sha256:67c8802e7c3e79eaa28811ce5e3245e8264b54e16afd450a3b8d727bc0dbccb8
