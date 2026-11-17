@@ -1,4 +1,4 @@
-# Verified branch `verified/7.50.00`
+# Pinned branch `pinned/nmcpinned-261117` (originally built as `verified/7.50.00`)
 
 Base: upstream `GAM-team/GAM` `main` @ `4cbf0e5bdacf7eee5009a67ec12c736fd5dc0d6e` (v7.50.00 + 1 commit, 2026-11-05).
 Changes on top of that commit: lock files, pinned CI references, and this folder. No GAM source file under `src/` was changed.
@@ -64,6 +64,10 @@ Resolved review items:
 4. **Source findings above** are not fixed on this branch.
 5. **CI edits are untested** on GitHub Actions. Run them on a fork first.
 6. **Attestation covers the upload, not the code.** A maintainer-signed release can still contain a malicious commit.
+
+## Upstream 7.51.00 to 7.52.03 (reviewed 2026-11-17, not adopted)
+
+Codex GPT-6.1 Sol (high, fast) reviewed the full diff `4cbf0e5b..cd56b252`: no malware, exfiltration or backdoor. Report: `verified/audits/update-review-7.52.03-codex.md`. 7.52.00 adds `gam version update` / `gam version install`, a self-updater that trusts the digest from the same GitHub API response as the download and runs the downloaded binary before replacing the install. That would replace this audited build with unaudited upstream binaries. It is absent from 7.50.00. If this branch is ever rebased onto 7.52.x, remove or hard-reject both commands first, and drop `path` from `version check`. 7.51-7.52 contain no security fixes. `chardet` 7.7.0 and `filelock` 4.2.6 were not provenance-checked.
 
 ## Updating
 
